@@ -132,7 +132,7 @@ export default function Index(): ReactElement {
         let documentItem = {
           waBlasUserName: value.waBlasUserName,
           waBlasUserWhatsappNumber: value.waBlasUserWhatsappNumber,
-          waBlasUserCategory: value.waBlasUserCategory,
+          waBlasUserCategory: value.category?.waBlasUserCategoryName,
           createdAt: convertTime(value.createdAt)
         }
         xlsRows.push(documentItem)
@@ -146,7 +146,7 @@ export default function Index(): ReactElement {
         let innerRowData = []
         innerRowData.push(value.waBlasUserName)
         innerRowData.push(value.waBlasUserWhatsappNumber)
-        innerRowData.push(value.waBlasUserCategory)
+        innerRowData.push(value.category?.waBlasUserCategoryName)
         innerRowData.push(value.createdAt)
         createXLSLFormatObj.push(innerRowData)
       })
@@ -188,7 +188,7 @@ export default function Index(): ReactElement {
       title: 'Category',
       data: (data: IWaBlasUserModel, index: number): ReactElement => (
         <td key={index + 'category'} className="md:px-6 md:py-3">
-          {data.waBlasUserCategory}
+          {data.category?.waBlasUserCategoryName}
         </td>
       )
     },

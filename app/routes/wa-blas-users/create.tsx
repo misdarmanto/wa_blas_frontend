@@ -44,7 +44,7 @@ export let action: ActionFunction = async ({ request }) => {
       const payload: IWaBlasUserModel | any = {
         waBlasUserName: formData.get('waBlasUserName'),
         waBlasUserWhatsappNumber: formData.get('waBlasUserWhatsappNumber'),
-        waBlasUserCategory: formData.get('waBlasUserCategory')
+        waBlasUserCategoryId: formData.get('waBlasUserCategoryId')
       }
       await API.post(session, CONFIG.baseUrlApi + '/wa-blas-users', payload)
       return redirect('/wa-blas-users')
@@ -63,7 +63,7 @@ export default function Index() {
   const submit = useSubmit()
   const transition = useTransition()
   const actionData = useActionData()
-  const [waBlasUserCategory, setWaBlasUserCategory] = useState('')
+  const [waBlasUserCategoryId, setWaBlasUserCategoryId] = useState('')
 
   console.log(loader)
   if (loader.isError) {
@@ -118,14 +118,11 @@ export default function Index() {
               Category
             </label>
             <select
-              onChange={(e) => setWaBlasUserCategory(e.target.value)}
+              onChange={(e) => setWaBlasUserCategoryId(e.target.value)}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             >
               {categories.map((item) => (
-                <option
-                  key={item.waBlasUserCategoryId}
-                  value={item.waBlasUserCategoryName}
-                >
+                <option key={item.waBlasUserCategoryId} value={item.waBlasUserCategoryId}>
                   {item.waBlasUserCategoryName}
                 </option>
               ))}
@@ -142,7 +139,7 @@ export default function Index() {
           </button>
         </div>
 
-        <input hidden name="waBlasUserCategory" value={waBlasUserCategory} />
+        <input hidden name="waBlasUserCategoryId" value={waBlasUserCategoryId} />
       </Form>
     </div>
   )
