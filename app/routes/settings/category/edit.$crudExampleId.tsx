@@ -17,7 +17,15 @@ import type { IWaBlasUserModel } from '~/models/waBlasModel'
 export let loader: LoaderFunction = async ({ params, request }) => {
   const session: any = await checkSession(request)
   if (!session) return redirect('/login')
-  return { isError: false, session }
+  const crudExampleData = await API.get(
+    session,
+    CONFIG.baseUrlApi + `/crud-example/detail/${params.crudExampleId}`
+  )
+  return {
+    isError: false,
+    session,
+    crudExampleData
+  }
 }
 
 export let action: ActionFunction = async ({ request }) => {
@@ -26,11 +34,12 @@ export let action: ActionFunction = async ({ request }) => {
 
   let formData = await request.formData()
   try {
-    if (request.method == 'POST') {
+    if (request.method == 'PATCH') {
       const payload: IWaBlasUserModel | any = {
-        crudExampleName: formData.get('crudExampleName')
+        crudExampleName: formData.get('crudExampleName'),
+        crudExampleId: formData.get('crudExampleId')
       }
-      await API.post(session, CONFIG.baseUrlApi + '/crud-example', payload)
+      await API.patch(session, CONFIG.baseUrlApi + '/crud-example', payload)
       return redirect('/crud-example')
     }
     return { isError: false, request }
@@ -56,10 +65,12 @@ export default function Index() {
     )
   }
 
+  const crudExampleData: IWaBlasUserModel = loader.crudExampleData
+
   const submitData = async (e: React.FormEvent<HTMLFormElement>) => {
     submit(e.currentTarget, {
-      method: 'post',
-      action: `/crud-example/add`
+      method: 'patch',
+      action: `/crud-example/edit/${crudExampleData.waBlasUserId}`
     })
   }
 
@@ -73,22 +84,21 @@ export default function Index() {
         </div>
       )}
 
-      <Form method={'post'} onSubmit={submitData} className="bg-white rounded-xl p-10">
+      <Form method="patch" onSubmit={submitData} className="bg-white rounded-xl p-10">
         <div className="w-full md:mr-2">
           <div className="my-6">
-            <label className="block mb-2 text-sm font-medium text-gray-900">
-              Nama Tim
-            </label>
+            <label className="block mb-2 text-sm font-medium text-gray-900">Name</label>
             <input
               name="crudExampleName"
               type="text"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               required
               placeholder="nama..."
+              defaultValue={crudExampleData.waBlasUserName}
             />
           </div>
         </div>
-
+        <input hidden name="crudExampleId" value={crudExampleData.waBlasUserName} />
         <div className="flex justify-end mt-4">
           <button
             type="submit"

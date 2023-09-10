@@ -76,7 +76,7 @@ export default function Index() {
         </div>
       )}
 
-      <div className="ml-0 md:ml-4 mt-4 md:mt-0 bg-white rounded-xl p-5 sm:p-10">
+      <div className="ml-0 mt-4 md:mt-0 bg-white rounded-xl p-5 sm:p-10">
         <div className="flex gap-5 items-center my-5">
           <h3 className="text-lg font-semibold">Nama : </h3>
           <p className="text-gray-800">{admin.adminName}</p>

@@ -6,3 +6,8 @@ export interface IWaBlasUserModel extends IRootModel {
   waBlasUserWhatsappNumber?: string
   waBlasUserCategory?: string
 }
+
+export interface IWaBlasUserCategoryModel extends IRootModel {
+  waBlasUserCategoryId?: string
+  waBlasUserCategoryName?: string
+}

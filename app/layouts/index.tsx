@@ -3,7 +3,8 @@ import {
   MenuAlt2Icon,
   XIcon,
   UserIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  CogIcon
 } from '@heroicons/react/outline'
 import { BsLayers, BsPerson } from 'react-icons/bs'
 import { Fragment, useState } from 'react'
@@ -28,22 +29,22 @@ export default function Layout({
 
   const dashboard = { name: 'Dashboard', icon: HomeIcon, href: '/' }
 
-  const crudExampleMenu = {
+  const userMenu = {
     name: 'Users',
     icon: BsLayers,
     href: 'wa-blas-users/?size=10'
   }
 
-  // const waBlasMenu = {
-  // 	name: "Wa Blas",
-  // 	icon: BsWhatsapp,
-  // 	href: "wa-blas/?size=10",
-  // 	children: [
-  // 		{ name: "broadcast", href: "wa-blas/broadcast" },
-  // 		{ name: "history", href: "wa-blas/history" },
-  // 		{ name: "pengaturan", href: "wa-blas/setting" },
-  // 	],
-  // };
+  const waBlasSettingsMenu = {
+    name: 'Settings',
+    icon: CogIcon,
+
+    children: [
+      { name: 'Category', href: '/settings/category' }
+      // { name: 'history', href: 'wa-blas/history' },
+      // { name: 'pengaturan', href: 'wa-blas/setting' }
+    ]
+  }
 
   const myProfile = {
     name: 'My Profile',
@@ -53,7 +54,7 @@ export default function Layout({
 
   const admin = { name: 'Admin', icon: UserGroupIcon, href: 'admin' }
 
-  const NAVIGATIONS_LIST = [dashboard, crudExampleMenu]
+  const NAVIGATIONS_LIST = [dashboard, userMenu, waBlasSettingsMenu]
 
   if (session?.adminRole === 'superAdmin') {
     NAVIGATIONS_LIST.push(admin)
@@ -232,7 +233,7 @@ export default function Layout({
           <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto">
             <h1 className="text-md text-gray-700">
               <span className="font-extrabold text-2xl text-teal-500 mx-1">
-                Project App
+                Wa Blas App
               </span>
             </h1>
             <div className="mt-5 flex-1 flex flex-col">

@@ -1,4 +1,3 @@
-/* eslint-disable array-callback-return */
 import type { ReactElement } from 'react'
 import { useEffect, useState } from 'react'
 import {
@@ -21,10 +20,7 @@ import { Modal } from '~/components/Modal'
 import { Breadcrumb } from '~/components/breadcrumb'
 import { convertTime } from '~/utilities/convertTime'
 import type { ISessionModel } from '~/models/sessionModel'
-import type { IWaBlasUserModel } from '~/models/waBlasModel'
-import moment from 'moment'
-import * as XLSX from 'xlsx'
-import axios from 'axios'
+import type { IWaBlasUserCategoryModel } from '~/models/waBlasModel'
 
 export let loader: LoaderFunction = async ({ params, request }) => {
   const session: any = await checkSession(request)
@@ -38,7 +34,7 @@ export let loader: LoaderFunction = async ({ params, request }) => {
   try {
     const result = await API.getTableData({
       session: session,
-      url: CONFIG.baseUrlApi + '/wa-blas-users/list',
+      url: CONFIG.baseUrlApi + '/wa-blas-users-categories/list',
       pagination: true,
       page: +page || 0,
       size: +size || 10,
@@ -48,7 +44,7 @@ export let loader: LoaderFunction = async ({ params, request }) => {
     })
     return {
       table: {
-        link: 'wa-blas-users',
+        link: 'settings',
         data: result,
         page: page,
         size: size,
@@ -76,7 +72,8 @@ export let action: ActionFunction = async ({ request }) => {
     if (request.method == 'DELETE') {
       reponse = await API.delete(
         session,
-        CONFIG.baseUrlApi + `/wa-blas-users?waBlasUserId=${formData.get('waBlasUserId')}`
+        CONFIG.baseUrlApi +
+          `/wa-blas-users-categories?waBlasUserId=${formData.get('waBlasUserId')}`
       )
     }
     return { ...reponse.data, isError: false }
@@ -92,7 +89,7 @@ export default function Index(): ReactElement {
   const transition = useTransition()
   const [mobileActionDropDown, setMobileActionDropdown] = useState<number | null>()
   const [modalDelete, setModalDelete] = useState(false)
-  const [modalData, setModalData] = useState<IWaBlasUserModel>()
+  const [modalData, setModalData] = useState<IWaBlasUserCategoryModel>()
   const actionData = useActionData()
 
   useEffect(() => {
@@ -115,86 +112,18 @@ export default function Index(): ReactElement {
 
   const navigation = [{ title: 'List', href: '', active: true }]
 
-  const download = async () => {
-    try {
-      const result = await axios.get(
-        `${loader.API.baseUrl}/users/list?pagination=false`,
-        {
-          auth: {
-            username: loader.API.authorization.username,
-            password: loader.API.authorization.password
-          }
-        }
-      )
-
-      let xlsRows: any[] = []
-      await result.data.data.items.map((value: IWaBlasUserModel) => {
-        let documentItem = {
-          waBlasUserName: value.waBlasUserName,
-          waBlasUserWhatsappNumber: value.waBlasUserWhatsappNumber,
-          waBlasUserCategory: value.waBlasUserCategory,
-          createdAt: convertTime(value.createdAt)
-        }
-        xlsRows.push(documentItem)
-      })
-
-      let xlsHeader = ['Crud Nama', 'Tgl Dibuat']
-      let createXLSLFormatObj = []
-      createXLSLFormatObj.push(xlsHeader)
-      // eslint-disable-next-line array-callback-return
-      xlsRows.map((value: IWaBlasUserModel, i): void => {
-        let innerRowData = []
-        innerRowData.push(value.waBlasUserName)
-        innerRowData.push(value.waBlasUserWhatsappNumber)
-        innerRowData.push(value.waBlasUserCategory)
-        innerRowData.push(value.createdAt)
-        createXLSLFormatObj.push(innerRowData)
-      })
-
-      /* File Name */
-      let filename = `Data Pengguna ${moment().format('DD-MM-YYYY')}.xlsx`
-
-      /* Sheet Name */
-      let ws_name = 'Sheet1'
-      if (typeof console !== 'undefined') console.log(new Date())
-      let wb = XLSX.utils.book_new(),
-        ws = XLSX.utils.aoa_to_sheet(createXLSLFormatObj)
-
-      XLSX.utils.book_append_sheet(wb, ws, ws_name)
-      XLSX.writeFile(wb, filename)
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
   const header: TableHeader[] = [
     {
       title: 'Nama',
-      data: (data: IWaBlasUserModel, index: number): ReactElement => (
+      data: (data: IWaBlasUserCategoryModel, index: number): ReactElement => (
         <td key={index + 'name'} className="md:px-6 md:py-3">
-          {data.waBlasUserName}
-        </td>
-      )
-    },
-    {
-      title: 'WA',
-      data: (data: IWaBlasUserModel, index: number): ReactElement => (
-        <td key={index + 'whatsapp'} className="md:px-6 md:py-3">
-          {data.waBlasUserWhatsappNumber}
-        </td>
-      )
-    },
-    {
-      title: 'Category',
-      data: (data: IWaBlasUserModel, index: number): ReactElement => (
-        <td key={index + 'category'} className="md:px-6 md:py-3">
-          {data.waBlasUserCategory}
+          {data.waBlasUserCategoryName}
         </td>
       )
     },
     {
       title: 'Di buat pada',
-      data: (data: IWaBlasUserModel, index: number): ReactElement => (
+      data: (data: IWaBlasUserCategoryModel, index: number): ReactElement => (
         <td key={index + 'createdAt'} className="md:px-6 md:py-3">
           {convertTime(data.createdAt)}
         </td>
@@ -206,7 +135,7 @@ export default function Index(): ReactElement {
     header.push({
       title: 'Aksi',
       action: true,
-      data: (data: IWaBlasUserModel, index: number): ReactElement => (
+      data: (data: IWaBlasUserCategoryModel, index: number): ReactElement => (
         <td key={index + 'action'} className="md:px-6 md:py-3">
           {/* Desktop only  */}
           <div className="hidden md:block w-64">
@@ -220,7 +149,7 @@ export default function Index(): ReactElement {
               Hapus
             </button>
             &nbsp;
-            <Link to={`/wa-blas-users/edit/${data.waBlasUserId}`}>
+            <Link to={`/wa-blas-users/edit/${data.waBlasUserCategoryId}`}>
               <button className="bg-transparent  m-1 hover:bg-teal-500 text-teal-700 hover:text-white py-1 px-2 border border-teal-500 hover:border-transparent rounded">
                 Edit
               </button>
@@ -264,7 +193,7 @@ export default function Index(): ReactElement {
               <ul className="py-1" aria-labelledby={`dropdownButton-${index}`}>
                 <li>
                   <Link
-                    to={`/wa-blas-users/edit/${data.waBlasUserId}`}
+                    to={`/wa-blas-users/edit/${data.waBlasUserCategoryId}`}
                     className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-800 dark:hover:text-white"
                   >
                     Edit
@@ -325,18 +254,9 @@ export default function Index(): ReactElement {
                   type="button"
                   className="bg-transparent hover:bg-teal-500 text-teal-700 font-semibold hover:text-white py-2 px-4 border border-teal-500 hover:border-transparent rounded"
                 >
-                  Tambah
+                  Create
                 </button>
               </Link>
-            )}
-            {session.adminRole === 'superAdmin' && (
-              <button
-                type="button"
-                onClick={download}
-                className="bg-transparent hover:bg-teal-500 text-teal-700 font-semibold hover:text-white py-2 px-4 border border-teal-500 hover:border-transparent rounded"
-              >
-                Export
-              </button>
             )}
           </div>
           <div className="w-full mb-2 md:w-1/5">
@@ -363,9 +283,9 @@ export default function Index(): ReactElement {
           <input
             className="hidden"
             name="waBlasUserId"
-            defaultValue={modalData?.waBlasUserId}
+            value={modalData?.waBlasUserCategoryId}
           />
-          Anda yakin akan menghapus <strong>{modalData?.waBlasUserName}</strong>
+          Anda yakin akan menghapus <strong>{modalData?.waBlasUserCategoryName}</strong>
           <div className="flex flex-col md:flex-row mt-4">
             <button
               type="submit"
