@@ -306,7 +306,7 @@ export default function Index(): ReactElement {
         method="get"
       >
         <div className="flex flex-col md:flex-row justify-between mb-2 md:px-0">
-          <div className="px-1 w-full mb-2 flex flex-row justify-between md:justify-start">
+          <div className="px-1 w-full mb-2 flex flex-row  gap-2 justify-betweenmd:justify-start">
             <select
               name="size"
               defaultValue={loader?.table?.size}

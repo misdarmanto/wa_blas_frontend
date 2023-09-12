@@ -12,42 +12,26 @@ import { checkSession } from '~/services/session'
 import { CONFIG } from '~/config'
 import { Breadcrumb } from '~/components/breadcrumb'
 import type { ISessionModel } from '~/models/sessionModel'
-import type { IWaBlasUserCategoryModel, IWaBlasUserModel } from '~/models/waBlasModel'
-import { useState } from 'react'
+import type { IWaBlasUserCategoryModel } from '~/models/waBlasModel'
 
 export let loader: LoaderFunction = async ({ params, request }) => {
   const session: any = await checkSession(request)
   if (!session) return redirect('/login')
-  try {
-    const result = await API.get(
-      session,
-      CONFIG.baseUrlApi + `/wa-blas-users-categories/list`
-    )
-    return {
-      categories: result.items,
-      session: session,
-      isError: false
-    }
-  } catch (error: any) {
-    console.log(error)
-    return { ...error, isError: true }
-  }
+  return { isError: false, session }
 }
 
 export let action: ActionFunction = async ({ request }) => {
   const session: ISessionModel | any = await checkSession(request)
   if (!session) return redirect('/login')
 
-  const formData = await request.formData()
+  let formData = await request.formData()
   try {
     if (request.method == 'POST') {
-      const payload: IWaBlasUserModel | any = {
-        waBlasUserName: formData.get('waBlasUserName'),
-        waBlasUserWhatsappNumber: formData.get('waBlasUserWhatsappNumber'),
-        waBlasUserCategoryId: formData.get('waBlasUserCategoryId')
+      const payload: IWaBlasUserCategoryModel | any = {
+        waBlasUserCategoryName: formData.get('waBlasUserCategoryName')
       }
-      await API.post(session, CONFIG.baseUrlApi + '/wa-blas-users', payload)
-      return redirect('/wa-blas-users')
+      await API.post(session, CONFIG.baseUrlApi + '/wa-blas-users-categories', payload)
+      return redirect('/settings/category')
     }
     return { isError: false, request }
   } catch (error: any) {
@@ -59,11 +43,9 @@ export let action: ActionFunction = async ({ request }) => {
 export default function Index() {
   const navigation = [{ title: 'Create', href: '', active: true }]
   const loader = useLoaderData()
-  const categories = loader.categories as IWaBlasUserCategoryModel[]
   const submit = useSubmit()
   const transition = useTransition()
   const actionData = useActionData()
-  const [waBlasUserCategoryId, setWaBlasUserCategoryId] = useState('')
 
   console.log(loader)
   if (loader.isError) {
@@ -77,7 +59,7 @@ export default function Index() {
   const submitData = async (e: React.FormEvent<HTMLFormElement>) => {
     submit(e.currentTarget, {
       method: 'post',
-      action: `/wa-blas-users/create`
+      action: `/settings/category/create`
     })
   }
 
@@ -94,42 +76,16 @@ export default function Index() {
       <Form method={'post'} onSubmit={submitData} className="bg-white rounded-xl p-10">
         <div className="w-full md:mr-2">
           <div className="my-6">
-            <label className="block mb-2 text-sm font-medium text-gray-900">nama</label>
+            <label className="block mb-2 text-sm font-medium text-gray-900">
+              category name
+            </label>
             <input
-              name="waBlasUserName"
+              name="waBlasUserCategoryName"
               type="text"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               required
-              placeholder="nama..."
+              placeholder="name..."
             />
-          </div>
-          <div className="my-6">
-            <label className="block mb-2 text-sm font-medium text-gray-900">WA</label>
-            <input
-              name="waBlasUserWhatsappNumber"
-              type="tel"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-              required
-              placeholder="082212312321"
-            />
-          </div>
-          <div className="my-6">
-            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-              Category
-            </label>
-            <select
-              onChange={(e) => setWaBlasUserCategoryId(e.target.value)}
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            >
-              {categories.map((item) => (
-                <option
-                  key={item.waBlasUserCategoryId}
-                  defaultValue={item.waBlasUserCategoryId}
-                >
-                  {item.waBlasUserCategoryName}
-                </option>
-              ))}
-            </select>
           </div>
         </div>
 
@@ -141,8 +97,6 @@ export default function Index() {
             {transition?.submission ? 'Loading...' : 'Submit'}
           </button>
         </div>
-
-        <input hidden name="waBlasUserCategoryId" value={waBlasUserCategoryId} />
       </Form>
     </div>
   )

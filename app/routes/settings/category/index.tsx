@@ -44,7 +44,7 @@ export let loader: LoaderFunction = async ({ params, request }) => {
     })
     return {
       table: {
-        link: 'settings',
+        link: 'settings/category',
         data: result,
         page: page,
         size: size,

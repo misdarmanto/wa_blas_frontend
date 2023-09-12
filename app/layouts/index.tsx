@@ -6,7 +6,7 @@ import {
   UserGroupIcon,
   CogIcon
 } from '@heroicons/react/outline'
-import { BsLayers, BsPerson } from 'react-icons/bs'
+import { BsLayers, BsPerson, BsWhatsapp } from 'react-icons/bs'
 import { Fragment, useState } from 'react'
 import { Dialog, Menu, Transition, Disclosure } from '@headlessui/react'
 
@@ -35,6 +35,16 @@ export default function Layout({
     href: 'wa-blas-users/?size=10'
   }
 
+  const waBlasMenu = {
+    name: 'Wa Blas',
+    icon: BsWhatsapp,
+    href: 'wa-blas/?size=10',
+    children: [
+      { name: 'broadcast', href: 'wa-blas/broadcast' },
+      { name: 'pesan default', href: 'wa-blas/default-message' }
+    ]
+  }
+
   const waBlasSettingsMenu = {
     name: 'Settings',
     icon: CogIcon,
@@ -54,7 +64,7 @@ export default function Layout({
 
   const admin = { name: 'Admin', icon: UserGroupIcon, href: 'admin' }
 
-  const NAVIGATIONS_LIST = [dashboard, userMenu, waBlasSettingsMenu]
+  const NAVIGATIONS_LIST = [dashboard, userMenu, waBlasMenu, waBlasSettingsMenu]
 
   if (session?.adminRole === 'superAdmin') {
     NAVIGATIONS_LIST.push(admin)

@@ -12,20 +12,12 @@ import { checkSession } from '~/services/session'
 import { CONFIG } from '~/config'
 import { Breadcrumb } from '~/components/breadcrumb'
 import type { ISessionModel } from '~/models/sessionModel'
-import type { IWaBlasUserModel } from '~/models/waBlasModel'
+import type { IWaBlasUserCategoryModel } from '~/models/waBlasModel'
 
 export let loader: LoaderFunction = async ({ params, request }) => {
   const session: any = await checkSession(request)
   if (!session) return redirect('/login')
-  const crudExampleData = await API.get(
-    session,
-    CONFIG.baseUrlApi + `/crud-example/detail/${params.crudExampleId}`
-  )
-  return {
-    isError: false,
-    session,
-    crudExampleData
-  }
+  return { isError: false, session }
 }
 
 export let action: ActionFunction = async ({ request }) => {
@@ -34,13 +26,12 @@ export let action: ActionFunction = async ({ request }) => {
 
   let formData = await request.formData()
   try {
-    if (request.method == 'PATCH') {
-      const payload: IWaBlasUserModel | any = {
-        crudExampleName: formData.get('crudExampleName'),
-        crudExampleId: formData.get('crudExampleId')
+    if (request.method == 'POST') {
+      const payload: IWaBlasUserCategoryModel | any = {
+        waBlasUserCategoryName: formData.get('waBlasUserCategoryName')
       }
-      await API.patch(session, CONFIG.baseUrlApi + '/crud-example', payload)
-      return redirect('/crud-example')
+      await API.post(session, CONFIG.baseUrlApi + '/wa-blas-users-categories', payload)
+      return redirect('/settings/category')
     }
     return { isError: false, request }
   } catch (error: any) {
@@ -50,7 +41,7 @@ export let action: ActionFunction = async ({ request }) => {
 }
 
 export default function Index() {
-  const navigation = [{ title: 'Tambah', href: '', active: true }]
+  const navigation = [{ title: 'Create', href: '', active: true }]
   const loader = useLoaderData()
   const submit = useSubmit()
   const transition = useTransition()
@@ -60,23 +51,21 @@ export default function Index() {
   if (loader.isError) {
     return (
       <h1 className="text-center font-bold text-3xl text-red-600">
-        {loader.error?.messsage || `error ${loader.code || ''}`}
+        {loader.error?.messsage || `error ${loader.code ?? ''}`}
       </h1>
     )
   }
 
-  const crudExampleData: IWaBlasUserModel = loader.crudExampleData
-
   const submitData = async (e: React.FormEvent<HTMLFormElement>) => {
     submit(e.currentTarget, {
-      method: 'patch',
-      action: `/crud-example/edit/${crudExampleData.waBlasUserId}`
+      method: 'post',
+      action: `/settings/category/create`
     })
   }
 
   return (
     <div className="">
-      <Breadcrumb title="Tim Relawan" navigation={navigation} />
+      <Breadcrumb title="Wa Blas User" navigation={navigation} />
 
       {actionData?.isError && (
         <div className="p-4 my-5 text-sm text-red-800 rounded-lg bg-red-50" role="alert">
@@ -84,21 +73,22 @@ export default function Index() {
         </div>
       )}
 
-      <Form method="patch" onSubmit={submitData} className="bg-white rounded-xl p-10">
+      <Form method={'post'} onSubmit={submitData} className="bg-white rounded-xl p-10">
         <div className="w-full md:mr-2">
           <div className="my-6">
-            <label className="block mb-2 text-sm font-medium text-gray-900">Name</label>
+            <label className="block mb-2 text-sm font-medium text-gray-900">
+              category name
+            </label>
             <input
-              name="crudExampleName"
+              name="waBlasUserCategoryName"
               type="text"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               required
-              placeholder="nama..."
-              defaultValue={crudExampleData.waBlasUserName}
+              placeholder="name..."
             />
           </div>
         </div>
-        <input hidden name="crudExampleId" value={crudExampleData.waBlasUserName} />
+
         <div className="flex justify-end mt-4">
           <button
             type="submit"

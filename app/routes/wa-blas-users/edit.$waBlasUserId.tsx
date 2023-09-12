@@ -19,12 +19,17 @@ export let loader: LoaderFunction = async ({ params, request }) => {
   const session: any = await checkSession(request)
   if (!session) return redirect('/login')
   try {
-    const result = await API.get(
+    const categories = await API.get(
       session,
       CONFIG.baseUrlApi + `/wa-blas-users-categories/list`
     )
+    const waBlasUserDetail = await API.get(
+      session,
+      CONFIG.baseUrlApi + `/wa-blas-users/detail/${params.waBlasUserId}`
+    )
     return {
-      categories: result.items,
+      categories: categories.items,
+      waBlasUserDetail,
       session: session,
       isError: false
     }
@@ -40,13 +45,14 @@ export let action: ActionFunction = async ({ request }) => {
 
   const formData = await request.formData()
   try {
-    if (request.method == 'POST') {
+    if (request.method == 'PATCH') {
       const payload: IWaBlasUserModel | any = {
+        waBlasUserId: formData.get('waBlasUserId'),
         waBlasUserName: formData.get('waBlasUserName'),
         waBlasUserWhatsappNumber: formData.get('waBlasUserWhatsappNumber'),
         waBlasUserCategoryId: formData.get('waBlasUserCategoryId')
       }
-      await API.post(session, CONFIG.baseUrlApi + '/wa-blas-users', payload)
+      await API.patch(session, CONFIG.baseUrlApi + '/wa-blas-users', payload)
       return redirect('/wa-blas-users')
     }
     return { isError: false, request }
@@ -59,7 +65,7 @@ export let action: ActionFunction = async ({ request }) => {
 export default function Index() {
   const navigation = [{ title: 'Create', href: '', active: true }]
   const loader = useLoaderData()
-  const categories = loader.categories as IWaBlasUserCategoryModel[]
+
   const submit = useSubmit()
   const transition = useTransition()
   const actionData = useActionData()
@@ -74,9 +80,12 @@ export default function Index() {
     )
   }
 
+  const categories = loader.categories as IWaBlasUserCategoryModel[]
+  const waBlasUserDetail = loader.waBlasUserDetail as IWaBlasUserModel
+
   const submitData = async (e: React.FormEvent<HTMLFormElement>) => {
     submit(e.currentTarget, {
-      method: 'post',
+      method: 'patch',
       action: `/wa-blas-users/create`
     })
   }
@@ -91,7 +100,7 @@ export default function Index() {
         </div>
       )}
 
-      <Form method={'post'} onSubmit={submitData} className="bg-white rounded-xl p-10">
+      <Form method={'patch'} onSubmit={submitData} className="bg-white rounded-xl p-10">
         <div className="w-full md:mr-2">
           <div className="my-6">
             <label className="block mb-2 text-sm font-medium text-gray-900">nama</label>
@@ -101,6 +110,7 @@ export default function Index() {
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               required
               placeholder="nama..."
+              defaultValue={waBlasUserDetail.waBlasUserName}
             />
           </div>
           <div className="my-6">
@@ -111,6 +121,7 @@ export default function Index() {
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               required
               placeholder="082212312321"
+              defaultValue={waBlasUserDetail.waBlasUserWhatsappNumber}
             />
           </div>
           <div className="my-6">
@@ -121,11 +132,11 @@ export default function Index() {
               onChange={(e) => setWaBlasUserCategoryId(e.target.value)}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             >
+              <option value={waBlasUserDetail.category?.waBlasUserCategoryId}>
+                {waBlasUserDetail.category?.waBlasUserCategoryName}
+              </option>
               {categories.map((item) => (
-                <option
-                  key={item.waBlasUserCategoryId}
-                  defaultValue={item.waBlasUserCategoryId}
-                >
+                <option key={item.waBlasUserCategoryId} value={item.waBlasUserCategoryId}>
                   {item.waBlasUserCategoryName}
                 </option>
               ))}
@@ -142,7 +153,8 @@ export default function Index() {
           </button>
         </div>
 
-        <input hidden name="waBlasUserCategoryId" value={waBlasUserCategoryId} />
+        <input hidden name="waBlasUserCategoryId" defaultValue={waBlasUserCategoryId} />
+        <input hidden name="waBlasUserId" defaultValue={waBlasUserDetail.waBlasUserId} />
       </Form>
     </div>
   )
