@@ -13,7 +13,6 @@ import { CONFIG } from '~/config'
 import { Breadcrumb } from '~/components/breadcrumb'
 import type { ISessionModel } from '~/models/sessionModel'
 import type { IWaBlasUserCategoryModel, IWaBlasUserModel } from '~/models/waBlasModel'
-import { useState } from 'react'
 
 export let loader: LoaderFunction = async ({ params, request }) => {
   const session: any = await checkSession(request)
@@ -63,7 +62,6 @@ export default function Index() {
   const submit = useSubmit()
   const transition = useTransition()
   const actionData = useActionData()
-  const [waBlasUserCategoryId, setWaBlasUserCategoryId] = useState('')
 
   console.log(loader)
   if (loader.isError) {
@@ -73,6 +71,8 @@ export default function Index() {
       </h1>
     )
   }
+
+  // const formKey = 'formKey'
 
   const submitData = async (e: React.FormEvent<HTMLFormElement>) => {
     submit(e.currentTarget, {
@@ -118,8 +118,9 @@ export default function Index() {
               Category
             </label>
             <select
-              onChange={(e) => setWaBlasUserCategoryId(e.target.value)}
+              name="waBlasUserCategoryId"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              defaultValue={categories[0].waBlasUserCategoryId}
             >
               {categories.map((item) => (
                 <option
@@ -141,8 +142,6 @@ export default function Index() {
             {transition?.submission ? 'Loading...' : 'Submit'}
           </button>
         </div>
-
-        <input hidden name="waBlasUserCategoryId" value={waBlasUserCategoryId} />
       </Form>
     </div>
   )

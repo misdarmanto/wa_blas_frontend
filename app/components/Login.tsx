@@ -33,7 +33,7 @@ export default function Login({ errors, transition }: ILogin) {
                   <input
                     id="email"
                     name="email"
-                    defaultValue={'admin@lenterailmu.com'}
+                    defaultValue={'superAdmin@mail.com'}
                     type="email"
                     autoComplete="email"
                     placeholder="Masukkan email"
